@@ -22,7 +22,7 @@ Mouse.release(MOUSE_LEFT);
 if (digitalRead(pinBotao) == HIGH){
   isPressed = true;
 } else{
-  isPressed == false;
+  isPressed = false;
 }
 
   
