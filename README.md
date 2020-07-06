@@ -1,2 +1,2 @@
-# ak47SprayControl
-ak47SprayControl
+# SprayControl
+SprayControl
