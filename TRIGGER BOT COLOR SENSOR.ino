@@ -1,60 +1,52 @@
-#include "TCS34725.h"
+#include <Pixy2.h>
+#include <SPI.h>
 #include <Mouse.h>
-boolean isPressed = false;
-TCS34725 tcs;
-int pinBotao = 16;
 
-    int marcador = 0;
-    int verde = 0;
+// This is the main Pixy object 
+Pixy2 pixy;
 
-void setup(void)
+
+void setup()
 {
-    Serial.begin(115200);
-    pinMode(pinBotao, INPUT_PULLUP);
-    digitalWrite(pinBotao, LOW);
-
-    Wire.begin();
-    if (!tcs.attach(Wire))
-        Serial.println("ERROR: TCS34725 NOT FOUND !!!");
-
-    tcs.integrationTime(15); // ms
-
-    // set LEDs...
-    analogWrite(A0, LOW);
-
-
+  Serial.begin(115200);
+  Serial.print("Starting...\n");
+  Mouse.begin();
+  pixy.init();
 }
 
-void loop(void)
-{
- 
-
-   while(digitalRead(pinBotao) == HIGH){
-       
-    if (tcs.available()) // if current measurement has done
+void loop()
+{ 
+  int i; 
+  // grab blocks!
+  pixy.ccc.getBlocks();
+  
+  // If there are detect blocks, print them!
+  if (pixy.ccc.numBlocks)
+  {
+    Serial.print("Detected ");
+    Serial.println(pixy.ccc.numBlocks);
+    for (i=0; i<pixy.ccc.numBlocks; i++)
     {
-        TCS34725::Color color = tcs.color();
-        if (marcador == 0){
-        verde = color.g;
-        marcador++;  
-       }
-        int verde2 = color.g;
-       // Serial.print("Red: "); Serial.print(color.r);
-      //  Serial.print(" Green: "); Serial.print(color.g);
-       // Serial.print(" Blue: "); Serial.println(color.b);  
-        
-       
-          
-          Serial.print(" Green: "); Serial.print(verde2);
-          Serial.print(" CONSTANTE: "); Serial.println(verde);
-          if(verde != verde2){
-
-           Mouse.click(MOUSE_LEFT);
-          delay(400);
-            
-          }     
+      Serial.print("  block ");
+      Serial.print(i);
+      Serial.print(": ");
+      //pixy.ccc.blocks[i].print();
+      int width = pixy.ccc.blocks[i].m_x;
+      int height = pixy.ccc.blocks[i].m_y;
+      Serial.print(width); 
+      Serial.print(" "); 
+      Serial.println(height);
+      //int x = map(width, 157, -157, 0, 315);
+      //int y = map(height, 103, -103, 0, 207); 
       
-        }            
+      int x = map(width, 0, 315, -157, 157);
+      int y = map(height, 0, 207, -103, 103);
+     
+      Serial.print(x);
+      Serial.print(" ");
+      Serial.println(y);
+      Mouse.move(x, y);
+      delay(1000);
     }
-    marcador = 0;
+  }  
 }
